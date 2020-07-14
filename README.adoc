@@ -1,7 +1,7 @@
 This library in this repository has been modified to allow sockets with size bigger than the ethernet buffer capacity to be sent. 
 This is achieved by splitting the data to be sent in multiple sockets.
 This library is fully compatible with the original Ethernet library.
-I have had zero problems sending HTML pages of up to 20kB.
+I have had zero problems serving HTML pages of up to 20kB using the https://github.com/khoih-prog/EthernetWebServer library.
 
 = Ethernet Library for Arduino =
 

@@ -82,8 +82,31 @@ size_t EthernetClient::write(uint8_t b)
 
 size_t EthernetClient::write(const uint8_t *buf, size_t size)
 {
+	// Chooses an appropriate value for MAX_SOCKET_SIZE accordin to the maximum number of sockets allowed.
+#if MAX_SOCK_NUM <= 1
+	size_t MAX_SOCKET_SIZE = 16000;
+#elif MAX_SOCK_NUM <= 2
+	size_t MAX_SOCKET_SIZE = 8000;
+#elif MAX_SOCK_NUM <= 4
+	size_t MAX_SOCKET_SIZE = 4000;
+#else
+	size_t MAX_SOCKET_SIZE = 2000;
+#endif
+
 	if (sockindex >= MAX_SOCK_NUM) return 0;
-	if (Ethernet.socketSend(sockindex, buf, size)) return size;
+	
+	if (size <= MAX_SOCKET_SIZE) // If the size of the socket to be sent is lesser than MAX_SOCKET_SIZE, just sends it.
+	{
+		if (Ethernet.socketSend(sockindex, buf, size)) 
+			return size;
+	}
+	else // If the size of the socket to be sent is greater than MAX_SOCKET_SIZE, splits it into different sockets of size MAX_SOCKET_SIZE.
+	{
+		for (size_t i = 0; i <= size / MAX_SOCKET_SIZE; i++)
+			Ethernet.socketSend(sockindex, buf + (i * MAX_SOCKET_SIZE), min(MAX_SOCKET_SIZE, size - (i * MAX_SOCKET_SIZE)));
+		return size;
+	}
+
 	setWriteError();
 	return 0;
 }
